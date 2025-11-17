@@ -1,0 +1,35 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: "Carga Baixa - 10 usuários/seg"
+
+scenarios:
+  - name: "Listar produtos"
+    weight: 40
+    flow:
+      - get:
+          url: "/products?limit=50&offset=0"
+      - think: 1
+
+  - name: "Buscar produto específico"
+    weight: 30
+    flow:
+      - get:
+          url: "/products/{{ $randomNumber(1, 10000) }}"
+      - think: 0.5
+
+  - name: "Produtos por categoria"
+    weight: 20
+    flow:
+      - get:
+          url: "/products/category/{{ $randomNumber(1, 4) }}?limit=50"
+      - think: 1
+
+  - name: "Top produtos caros"
+    weight: 10
+    flow:
+      - get:
+          url: "/products/top/expensive?limit=20"
+      - think: 2

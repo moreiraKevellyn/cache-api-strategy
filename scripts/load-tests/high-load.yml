@@ -1,0 +1,37 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30
+      arrivalRate: 100
+      name: "Warmup"
+    - duration: 180
+      arrivalRate: 200
+      name: "Carga Alta - 200 usuários/seg"
+    - duration: 30
+      arrivalRate: 50
+      name: "Cooldown"
+
+scenarios:
+  - name: "Buscar produto específico (hot data)"
+    weight: 50
+    flow:
+      - get:
+          url: "/products/{{ $randomNumber(1, 100) }}"
+
+  - name: "Listar produtos"
+    weight: 25
+    flow:
+      - get:
+          url: "/products?limit=50&offset=0"
+
+  - name: "Produtos por categoria"
+    weight: 15
+    flow:
+      - get:
+          url: "/products/category/{{ $randomNumber(1, 4) }}?limit=30"
+
+  - name: "Top produtos caros"
+    weight: 10
+    flow:
+      - get:
+          url: "/products/top/expensive?limit=20"

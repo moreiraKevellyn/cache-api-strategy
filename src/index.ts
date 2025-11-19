@@ -57,7 +57,7 @@ app.get('/cache/stats', async (req: Request, res: Response) => {
 app.post('/cache/strategy', (req: Request, res: Response) => {
   const { strategy } = req.body;
   
-  const validStrategies: CacheStrategy[] = ['memory', 'lru', 'redis', 'http'];
+  const validStrategies: CacheStrategy[] = ['none', 'memory', 'lru', 'redis', 'http'];
   
   if (!validStrategies.includes(strategy)) {
     return res.status(400).json({ 

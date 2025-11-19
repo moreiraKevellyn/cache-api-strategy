@@ -1,0 +1,277 @@
+{
+  "dashboard": {
+    "title": "Cache Strategy Comparison - TCC",
+    "uid": "cache-tcc",
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "5s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Hit Rate por Estratégia (%)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "(cache_hits_total / (cache_hits_total + cache_misses_total)) * 100",
+            "legendFormat": "{{strategy}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Hit Rate (%)",
+            "format": "percent",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "lines": true,
+        "fill": 1,
+        "linewidth": 2
+      },
+      {
+        "id": 2,
+        "title": "Total de Operações (Hits + Misses)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "targets": [
+          {
+            "expr": "cache_hits_total + cache_misses_total",
+            "legendFormat": "{{strategy}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Operações",
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Cache Hits (Total Acumulado)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "cache_hits_total",
+            "legendFormat": "{{strategy}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Hits",
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Cache Misses (Total Acumulado)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "cache_misses_total",
+            "legendFormat": "{{strategy}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Misses",
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Latência Média de GET (segundos)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "cache_operation_duration_seconds_sum{operation=\"get\"} / cache_operation_duration_seconds_count{operation=\"get\"}",
+            "legendFormat": "{{strategy}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Latência (s)",
+            "format": "s"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Uso de Memória (MB)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "cache_memory_bytes / 1024 / 1024",
+            "legendFormat": "{{strategy}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Memória (MB)",
+            "format": "decmbytes"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Taxa de Hits por Segundo",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(cache_hits_total[1m])",
+            "legendFormat": "{{strategy}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Hits/sec",
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Taxa de Misses por Segundo",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(cache_misses_total[1m])",
+            "legendFormat": "{{strategy}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Misses/sec",
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Duração das Queries no Banco (P95)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(db_query_duration_seconds_bucket[1m]))",
+            "legendFormat": "P95",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Duração (s)",
+            "format": "s"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Estatísticas em Tempo Real",
+        "type": "stat",
+        "gridPos": { "h": 6, "w": 6, "x": 0, "y": 40 },
+        "targets": [
+          {
+            "expr": "sum(cache_hits_total)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "displayName": "Total Hits"
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Total Misses",
+        "type": "stat",
+        "gridPos": { "h": 6, "w": 6, "x": 6, "y": 40 },
+        "targets": [
+          {
+            "expr": "sum(cache_misses_total)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "displayName": "Total Misses"
+          }
+        }
+      },
+      {
+        "id": 12,
+        "title": "Hit Rate Médio Global",
+        "type": "stat",
+        "gridPos": { "h": 6, "w": 6, "x": 12, "y": 40 },
+        "targets": [
+          {
+            "expr": "(sum(cache_hits_total) / (sum(cache_hits_total) + sum(cache_misses_total))) * 100",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "unit": "percent"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "displayName": "Hit Rate Global (%)",
+            "unit": "percent",
+            "decimals": 2
+          }
+        }
+      },
+      {
+        "id": 13,
+        "title": "Throughput Total (req/sec)",
+        "type": "stat",
+        "gridPos": { "h": 6, "w": 6, "x": 18, "y": 40 },
+        "targets": [
+          {
+            "expr": "sum(rate(cache_hits_total[1m])) + sum(rate(cache_misses_total[1m]))",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "displayName": "Throughput",
+            "unit": "reqps"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -2,18 +2,21 @@ import { MemoryCache } from './strategies/MemoryCache';
 import { LRUCache } from './strategies/LRUCache';
 import { RedisCache } from './strategies/RedisCache';
 import { HTTPCache } from './strategies/HTTPCache';
+import { NoneCache } from './strategies/NoneCache';
 import { Request } from 'express';
 
-export type CacheStrategy = 'memory' | 'lru' | 'redis' | 'http';
+export type CacheStrategy = 'none' | 'memory' | 'lru' | 'redis' | 'http';
 
 export class CacheManager {
+  private noneCache: NoneCache;
   private memoryCache: MemoryCache;
   private lruCache: LRUCache;
   private redisCache: RedisCache;
   private httpCache: HTTPCache;
-  private currentStrategy: CacheStrategy = 'memory';
+  private currentStrategy: CacheStrategy = 'none';
 
   constructor() {
+    this.noneCache = new NoneCache();
     this.memoryCache = new MemoryCache(300);
     this.lruCache = new LRUCache(1000, 300000);
     this.redisCache = new RedisCache(process.env.REDIS_URL, 300);
@@ -30,6 +33,8 @@ export class CacheManager {
 
   async get(key: string, req?: Request): Promise<any> {
     switch (this.currentStrategy) {
+      case 'none':
+        return await this.noneCache.get(key);
       case 'memory':
         return await this.memoryCache.get(key);
       case 'lru':
@@ -40,12 +45,14 @@ export class CacheManager {
         const mockReq = req || ({ headers: {} } as Request);
         return await this.httpCache.get(key, mockReq);
       default:
-        return await this.memoryCache.get(key);
+        return await this.noneCache.get(key);
     }
   }
 
   async set(key: string, value: any, ttl?: number): Promise<any> {
     switch (this.currentStrategy) {
+      case 'none':
+        return await this.noneCache.set(key, value);
       case 'memory':
         return await this.memoryCache.set(key, value, ttl);
       case 'lru':
@@ -55,12 +62,15 @@ export class CacheManager {
       case 'http':
         return await this.httpCache.set(key, value);
       default:
-        return await this.memoryCache.set(key, value, ttl);
+        return await this.noneCache.set(key, value);
     }
   }
 
   async delete(key: string): Promise<void> {
     switch (this.currentStrategy) {
+      case 'none':
+        await this.noneCache.delete(key);
+        break;
       case 'memory':
         await this.memoryCache.delete(key);
         break;
@@ -78,6 +88,9 @@ export class CacheManager {
 
   async clear(): Promise<void> {
     switch (this.currentStrategy) {
+      case 'none':
+        await this.noneCache.clear();
+        break;
       case 'memory':
         await this.memoryCache.clear();
         break;
@@ -95,6 +108,8 @@ export class CacheManager {
 
   async getStats() {
     switch (this.currentStrategy) {
+      case 'none':
+        return this.noneCache.getStats();
       case 'memory':
         return this.memoryCache.getStats();
       case 'lru':
@@ -104,12 +119,13 @@ export class CacheManager {
       case 'http':
         return this.httpCache.getStats();
       default:
-        return this.memoryCache.getStats();
+        return this.noneCache.getStats();
     }
   }
 
   async getAllStats() {
     return {
+      none: this.noneCache.getStats(),
       memory: this.memoryCache.getStats(),
       lru: this.lruCache.getStats(),
       redis: await this.redisCache.getStats(),
@@ -119,6 +135,7 @@ export class CacheManager {
   }
 
   async clearAll() {
+    await this.noneCache.clear();
     await this.memoryCache.clear();
     await this.lruCache.clear();
     await this.redisCache.clear();
